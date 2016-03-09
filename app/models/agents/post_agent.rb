@@ -17,6 +17,7 @@ module Agents
 
       If `emit_events` is set to `true`, the server response will be emitted as an Event and can be fed to a WebsiteAgent for parsing (using its `data_from_event` and `type` options). No data processing
       will be attempted by this Agent, so the Event's "body" value will always be raw text.
+      The Event will also have a "headers" hash with all keys downcased, and a "status" integer value.
 
       Other Options:
 
@@ -31,7 +32,7 @@ module Agents
         {
           "status": 200,
           "headers": {
-            "Content-Type": "text/html",
+            "content-type": "text/html",
             ...
           },
           "body": "<html>Some data...</html>"
@@ -135,7 +136,13 @@ module Agents
       }
 
       if boolify(interpolated['emit_events'])
-        create_event payload: { body: response.body, headers: response.headers, status: response.status }
+        # HTTP header names are case-insensitive and they may vary
+        # depending on FARADAY_HTTP_BACKEND, so downcase them for the
+        # ease of using.
+        headers = response.headers.each_with_object({}) { |(key, value), hash|
+          hash[key.downcase] = value
+        }
+        create_event payload: { body: response.body, headers: headers, status: response.status }
       end
     end
   end

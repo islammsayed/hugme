@@ -216,7 +216,7 @@ describe Agents::PostAgent do
 
         it "emits the response headers" do
           @checker.check
-          expect(@checker.events.last.payload['headers']).to eq({ 'Content-Type' => 'text/html' })
+          expect(@checker.events.last.payload['headers']).to eq({ 'content-type' => 'text/html' })
         end
       end
     end
