@@ -1,0 +1,89 @@
+{
+  "services": [
+    {
+      "name": "app",
+      "container_envvars": [
+        {
+          "key": "RACK_ENV",
+          "value": "production"
+        },
+        {
+          "key": "DATABASE_URL",
+          "value": "mysql2://root:UeBVPnlWFKcGb_ThU3jvTg@db:3306/app"
+        }
+      ],
+      "image": "",
+      "run_command": "rails s -b 0.0.0.0",
+      "container_ports": [
+        {
+          "protocol": "tcp",
+          "inner_port": 3000,
+          "published": true,
+          "outer_port": 6374
+        }
+      ],
+      "linked_to_service": [
+        {
+          "name": "db",
+          "to_service": "db"
+        }
+      ],
+      "target_num_containers": 1,
+      "sequential_deployment": true,
+      "autorestart": "ALWAYS",
+      "autoredeploy": true
+    },
+    {
+      "name": "db",
+      "image": "mysql",
+      "target_num_containers": 1,
+      "sequential_deployment": true,
+      "container_ports": [
+        {
+          "protocol": "tcp",
+          "inner_port": 3306,
+          "published": true
+        }
+      ],
+      "container_envvars": [
+        {
+          "key": "MYSQL_DATABASE",
+          "value": "app"
+        },
+        {
+          "key": "MYSQL_ROOT_PASSWORD",
+          "value": null
+        }
+      ]
+    },
+    {
+      "name": "worker",
+      "image": "",
+      "linked_to_service": [
+        {
+          "name": "redis",
+          "to_service": "redis"
+        },
+        {
+          "name": "db",
+          "to_service": "db"
+        }
+      ],
+      "run_command": "bundle exec rails runner bin/threaded.rb",
+      "autoredeploy": true,
+      "target_num_containers": 1,
+      "sequential_deployment": true,
+      "container_envvars": [
+        {
+          "key": "RACK_ENV",
+          "value": "production"
+        },
+        {
+          "key": "DATABASE_URL",
+          "value": "mysql2://root:UeBVPnlWFKcGb_ThU3jvTg@db:3306/app"
+        }
+      ]
+    }
+  ],
+  "name": "islammsayedhugme"
+}

@@ -1,0 +1,31 @@
+---
+version: '2'
+services:
+  common:
+    environment:
+      RACK_ENV: production
+      DATABASE_URL: mysql2://root:UeBVPnlWFKcGb_ThU3jvTg@db:3306/app
+    build: "."
+  app:
+    ports:
+    - 3000:3000
+    command: bundle exec rails server -p ${PORT-3000} -b ${IP-0.0.0.0}
+    links:
+    - db
+    extends:
+      service: common
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_ROOT_PASSWORD: UeBVPnlWFKcGb_ThU3jvTg
+  worker:
+    extends:
+      service: common
+    links:
+    - redis
+    - db
+    depends_on:
+    - redis
+    - db
+    command: bundle exec rails runner bin/threaded.rb
